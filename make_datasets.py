@@ -1,20 +1,27 @@
-from conf import conf
+from dataclasses import dataclass, field
+from typing import NewType
+from util import save_import_tensorflow
 
-from dataclasses import replace, dataclass, field
-
+tf = save_import_tensorflow(gpu='2')
 import tensorflow_datasets as tfds
-import tensorflow as tf
+
+Split = NewType('Split', str)
+train_split: Split = Split('train')
+val_split: Split = Split('val')
+test_split: Split = Split('test')
+
+LoadingState = NewType('not_yet_loaded', str)
 
 
 @dataclass
 class Dataset:
     name: str
-    split: str or list
-    NUM_CLASSES: int = field(init=False)
-    ds: tf.data.Dataset = field(init=False)
-    ds_train: tf.data.Dataset = field(init=False)
-    ds_val: tf.data.Dataset = field(init=False)
-    ds_test: tf.data.Dataset = field(init=False)
+    split: Split
+    NUM_CLASSES: int = field(default='not_yet_loaded', init=False)
+    ds: tf.data.Dataset = field(default='not_yet_loaded', init=False)
+
+    def __post_init__(self):
+        self.load()
 
     def load(self):
         raise NotImplementedError
@@ -22,10 +29,9 @@ class Dataset:
 
 @dataclass
 class _Cifar(Dataset):
-
     def load(self):
         # in distribution data
-        (self.ds_train, self.ds_val, self.ds_test), ds_info = tfds.load(
+        self.ds, ds_info = tfds.load(
             self.name, split=self.split, with_info=True, as_supervised=True
         )
         self.NUM_CLASSES = ds_info.features['label'].num_classes
@@ -33,20 +39,27 @@ class _Cifar(Dataset):
 
 @dataclass
 class Cifar10(_Cifar):
-    name = 'cifar10'
-    split = ['train[:80%]', 'train[80%:]', 'test']
+    split: Split
+    name: str = field(default='cifar10', init=False)
+
+    def __post_init__(self):
+        if self.split == train_split:
+            self.split = Split('train[:80%]')
+        if self.split == val_split:
+            self.split = Split('train[80%:]')
+        super(Cifar10, self).__post_init__()
 
 
 @dataclass
 class Cifar100(_Cifar):
-    name = 'cifar100'
-    split = ['train[:80%]', 'train[80%:]', 'test']
+    split: Split
+    name: str = field(default='cifar100', init=False)
 
 
 @dataclass
 class SVHNCropped(Dataset):
-    name = 'svhn_cropped'
-    split = 'test'
+    split: Split = Split('test')
+    name: str = field(default='svhn_cropped', init=False)
 
     def load(self):
         ood_data, ds_info = tfds.load(self.name, split=self.split, with_info=True, as_supervised=False)
@@ -69,8 +82,8 @@ class SVHNCropped(Dataset):
 
 @dataclass
 class Textures(Dataset):
-    name = 'dtd'
-    split = 'train+validation+test'
+    split: Split = Split('train+validation+test')
+    name: str = field(default='dtd', init=False)
 
     def load(self):
         ood_data, ds_info = tfds.load(self.name, split=self.split, with_info=True, as_supervised=False)
@@ -78,4 +91,3 @@ class Textures(Dataset):
         ood_data = ood_data.map(lambda d: (d['image'], d['label']))
 
         self.ds = ood_data
-
