@@ -6,7 +6,7 @@ from label_transformations import LabelTransformer
 from models import augment_image
 from util import save_import_tensorflow
 
-tf = save_import_tensorflow(gpu='3')
+tf = save_import_tensorflow(gpu='1')
 import tensorflow_datasets as tfds
 
 Split = NewType('Split', str)
@@ -113,6 +113,48 @@ Cifar100 = make_dataclass('Cifar100', [
 
 
 @dataclass
+class Cassava(Dataset):
+
+    split: Split = train_split
+    BATCH_SIZE = int = 32
+    name: str = 'cassava'
+
+    def _load(self):
+        # in distribution data
+        self.ds, ds_info = tfds.load(
+            self.name, split=self.split, with_info=True, as_supervised=True
+        )
+        self.NUM_CLASSES = ds_info.features['label'].num_classes
+
+    def __post_init__(self):
+        if self.split == val_split:
+            self.split = Split('validation')
+        super(Cassava, self).__post_init__()
+
+
+@dataclass
+class CatsVsDogs(Dataset):
+    split: Split = train_split
+    name: str = 'cats_vs_dogs'
+
+    def _load(self):
+        # in distribution data
+        self.ds, ds_info = tfds.load(
+            self.name, split=self.split, with_info=True, as_supervised=True
+        )
+        self.NUM_CLASSES = ds_info.features['label'].num_classes
+
+    def __post_init__(self):
+        if self.split == train_split:
+            self.split = Split('train[:60%]')
+        if self.split == val_split:
+            self.split = Split('train[60%:80%]')
+        if self.split == test_split:
+            self.split = Split('train[80%:]')
+        super(CatsVsDogs, self).__post_init__()
+
+
+@dataclass
 class SVHNCropped(Dataset):
     split: Split = Split('test')
     name: str = 'svhn_cropped'
@@ -167,3 +209,18 @@ class Food101(_LoadFromDictDataset):
             self.split = Split('validation')
 
         super(Food101, self).__post_init__()
+
+
+@dataclass
+class Cars196(_LoadFromDictDataset):
+    split: Split = train_split
+    name: str = 'cars196'
+
+    def __post_init__(self):
+        if self.split == train_split:
+            self.split = Split('train[:80%]')
+        if self.split == val_split:
+            self.split = Split('train[80%:]')
+
+        super(Cars196, self).__post_init__()
+

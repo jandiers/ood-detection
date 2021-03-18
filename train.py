@@ -1,4 +1,4 @@
-from conf import conf
+from conf import conf, outlier_exposure
 from models import ood_accuracy
 
 from util import save_import_tensorflow
@@ -8,11 +8,13 @@ ReduceLROnPlateau = tf.python.keras.callbacks.ReduceLROnPlateau
 EarlyStopping = tf.python.keras.callbacks.EarlyStopping
 
 
-ds_in = conf.in_distribution_data.load()
-ds_out = conf.out_of_distribution_data.load()
-ds = tf.data.experimental.sample_from_datasets([ds_in, ds_out], [0.5, 0.5], seed=29)
+ds = conf.in_distribution_data.load()
+ds_val = conf.val_ds.load()
 
-ds_val = conf.val_ds
+if conf.strategy == outlier_exposure:
+    ds_out = conf.out_of_distribution_data.load()
+    ds = tf.data.experimental.sample_from_datasets([ds, ds_out], [0.5, 0.5], seed=29)
+
 
 model = conf.make_model()
 
@@ -33,8 +35,14 @@ def unfreeze_model(model, layer_name: str):
             layer.trainable = True
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
+
+    if conf.strategy == outlier_exposure:
+        metrics = ['accuracy', ood_accuracy]
+    else:
+        metrics = ['accuracy']
+
     model.compile(
-        optimizer=optimizer, loss=conf.loss, metrics=["accuracy", ood_accuracy]
+        optimizer=optimizer, loss=conf.loss, metrics=metrics
     )
 
 
@@ -59,6 +67,3 @@ hist = model.fit(ds, epochs=conf.EPOCHS, initial_epoch=3, validation_data=ds_val
 
 model.evaluate(ds, verbose=1)
 
-
-# save configuration to weights
-conf.save()

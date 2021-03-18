@@ -1,26 +1,33 @@
 from dataclasses import dataclass, asdict, field, replace
 import json
+from typing import NewType
 
 from util import save_import_tensorflow
+
 tf = save_import_tensorflow(gpu='1')
 
 import foolbox as fb
-from make_datasets import Dataset, Cifar10, Cifar100, Food101, train_split, val_split
+from make_datasets import Dataset, Cifar10, Cifar100, Food101, Cars196, Cassava, train_split, val_split
 from label_transformations import UniformLabelTransformer, OneHotLabelTransformer
 
+TrainingStrategy = NewType('TrainingStrategy', str)
+normal = TrainingStrategy('normal')
+outlier_exposure = TrainingStrategy('outlier_exposure')
 
 in_dist = Cifar100(train_split,
-                  sample_weight=1.,
-                  label_transformer=OneHotLabelTransformer())
+                   sample_weight=1.,
+                   label_transformer=OneHotLabelTransformer())
 
 ood = Food101(num_samples=len(in_dist.ds),
               sample_weight=0.5,
               label_transformer=UniformLabelTransformer(in_dist.NUM_CLASSES))
 
+ood = None
+
 
 @dataclass
 class Configuration:
-    strategy: str = 'outlier_exposure'
+    strategy: TrainingStrategy = normal
 
     # in and out of distribution datasets
     in_distribution_data: Dataset = in_dist
@@ -36,7 +43,6 @@ class Configuration:
     MODEL_FUNCTION: str = 'effnetb0_custom_build_model'
 
     def __post_init__(self):
-
         self.val_ds = self._make_validation_set()
 
         if not hasattr(self, 'loss_repr'):
@@ -45,14 +51,18 @@ class Configuration:
         self.checkpoint_filepath = f'./trained_models/checkpoint/{self.strategy}/{self.in_distribution_data.name}/'
 
     def _make_validation_set(self):
-        in_dist_val = replace(self.in_distribution_data, split=val_split)
-        ood_val = replace(self.out_of_distribution_data, split=val_split, num_samples=len(in_dist_val.ds))
 
-        ds = tf.data.experimental.sample_from_datasets([in_dist_val.load(), ood_val.load()],
-                                                       [0.5, 0.5], seed=29)
+        if (self.out_of_distribution_data is not None) \
+                and (self.strategy == outlier_exposure):
 
-        self.in_dist_val, self.ood_val = in_dist_val, ood_val
-
+            # validation set consists of 50% inlier and 50% outlier datasets
+            in_dist_val = replace(self.in_distribution_data, split=val_split)
+            ood_val = replace(self.out_of_distribution_data, split=val_split, num_samples=len(in_dist_val.ds))
+            ds = tf.data.experimental.sample_from_datasets([in_dist_val.load(), ood_val.load()], [0.5, 0.5], seed=29)
+            self.in_dist_val, self.ood_val = in_dist_val, ood_val
+        else:
+            # normal validation set
+            ds = replace(self.in_distribution_data, split=val_split)
         return ds
 
     def make_model(self) -> tf.keras.Model:

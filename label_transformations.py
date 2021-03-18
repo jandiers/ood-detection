@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import NewType
 from util import save_import_tensorflow
-tf = save_import_tensorflow(gpu='3')
+tf = save_import_tensorflow(gpu='1')
 
 TransformedLabels = NewType('TransformedLabels', callable)
 
