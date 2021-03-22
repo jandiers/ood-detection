@@ -7,9 +7,8 @@ layers = tf.keras.layers
 ReduceLROnPlateau = tf.python.keras.callbacks.ReduceLROnPlateau
 EarlyStopping = tf.python.keras.callbacks.EarlyStopping
 
-
 ds = conf.in_distribution_data.load()
-ds_val = conf.val_ds.load()
+ds_val = conf.val_ds
 
 if conf.strategy == outlier_exposure:
     ds_out = conf.out_of_distribution_data.load()

@@ -1,52 +1,57 @@
 from dataclasses import replace
-from conf import conf, outlier_exposure
-from make_datasets import Cifar10, Cifar100, Textures, SVHNCropped, test_split, val_split
+from make_datasets import Dataset
+
 from sklearn import metrics
 import numpy as np
 
-# in and out of distribution data
-ds = Cifar100(test_split)
-ood = Textures()
 
-# load model
-conf = replace(conf, strategy=outlier_exposure, in_distribution_data=ds, out_of_distribution_data=None)
-model = conf.make_model()
-model.load_weights(conf.checkpoint_filepath)
+def outlier_exposure_results(ds: Dataset, ood: Dataset) -> dict:
+    from conf import conf, outlier_exposure
+    result_collection = dict()
 
-# true labels and predictions
-y_true = np.hstack([y.numpy() for (x, y, w) in ds.load()])
-pred_ds = model.predict(ds.load(), verbose=1)
-pred_ood = model.predict(ood.load(), verbose=1)
+    # load model
+    conf = replace(conf, strategy=outlier_exposure, in_distribution_data=ds, out_of_distribution_data=None)
+    model = conf.make_model()
+    model.load_weights(conf.checkpoint_filepath)
 
-print(f'Outlier Exposure: {ds.__class__.__name__} vs. {ood.__class__.__name__}')
+    # true labels and predictions
+    y_true = np.hstack([y.numpy() for (x, y, w) in ds.load()])
+    pred_ds = model.predict(ds.load(), verbose=1)
+    pred_ood = model.predict(ood.load(), verbose=1)
 
-class_accuracy = metrics.accuracy_score(y_true, pred_ds.argmax(1))
-print('Classification Accuracy no OOD:', class_accuracy)
+    print(f'Outlier Exposure: {ds.__class__.__name__} vs. {ood.__class__.__name__}')
 
-# OOD accuracies
-ood_detected = (pred_ood > 0.5).any(1).astype(int)   # 1 if classified as in distribution
-in_dist_detected = (pred_ds > 0.5).any(1).astype(int)
+    class_error = 1. - metrics.accuracy_score(y_true, pred_ds.argmax(1))
+    result_collection['classification error'] = class_error
+    print('Classification Error on dataset:', class_error)
 
-# concat pred for in-dist and out-of-dist
-all_pred = np.hstack((ood_detected, in_dist_detected))
+    # OOD accuracies
+    ood_detected = (pred_ood > 0.5).any(1).astype(int)   # 1 if classified as in distribution
+    in_dist_detected = (pred_ds > 0.5).any(1).astype(int)
 
-# labels: 0 for in distribution, 1 for out of distribution
-ood_labels = [0] * len(pred_ood) + [1] * len(pred_ds)
+    # concat pred for in-dist and out-of-dist
+    all_pred = np.hstack((ood_detected, in_dist_detected))
 
-ood_accuracy = metrics.accuracy_score(ood_labels, all_pred)
-print('OOD Accuracy:', ood_accuracy)
+    # labels: 0 for in distribution, 1 for out of distribution
+    ood_labels = [0] * len(pred_ood) + [1] * len(pred_ds)
 
-p = np.vstack((pred_ood, pred_ds))
-p = p.max(1)
-ood_auc = metrics.roc_auc_score(ood_labels, p)
-print('OOD Area under Curve:', ood_auc)
+    ood_error = 1. - metrics.accuracy_score(ood_labels, all_pred)
+    print('OOD Error:', ood_error)
+    result_collection['OOD error'] = ood_error
 
+    p = np.vstack((pred_ood, pred_ds))
+    p = p.max(1)
+    ood_auc = metrics.roc_auc_score(ood_labels, p)
+    result_collection['OOD AUC'] = ood_auc
+    print('OOD Area under Curve:', ood_auc)
 
-def fpr95(y_true, y_pred):
-    fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred)
-    ix = np.argwhere(tpr >= 0.95).ravel()[0]
-    return fpr[ix]
+    def fpr95(y_true, y_pred):
+        fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred)
+        ix = np.argwhere(tpr >= 0.95).ravel()[0]
+        return fpr[ix]
 
+    fpr = fpr95(ood_labels, p)
+    result_collection['FPR at 95% TPR'] = fpr
+    print('FPR at 95% TPR:', fpr)
 
-fpr = fpr95(ood_labels, p)
-print('FPR at 95% TPR:', fpr)
+    return result_collection

@@ -6,23 +6,20 @@ from util import save_import_tensorflow
 
 tf = save_import_tensorflow(gpu='1')
 
-import foolbox as fb
-from make_datasets import Dataset, Cifar10, Cifar100, Food101, Cars196, Cassava, train_split, val_split
+from make_datasets import Dataset, Cifar10, Cifar100, Food101, Cars196, Cassava, CatsVsDogs, train_split, val_split
 from label_transformations import UniformLabelTransformer, OneHotLabelTransformer
 
 TrainingStrategy = NewType('TrainingStrategy', str)
 normal = TrainingStrategy('normal')
 outlier_exposure = TrainingStrategy('outlier_exposure')
 
-in_dist = Cifar100(train_split,
-                   sample_weight=1.,
-                   label_transformer=OneHotLabelTransformer())
+in_dist = Cifar10(train_split,
+                  sample_weight=1.,
+                  label_transformer=OneHotLabelTransformer())
 
 ood = Food101(num_samples=len(in_dist.ds),
               sample_weight=0.5,
               label_transformer=UniformLabelTransformer(in_dist.NUM_CLASSES))
-
-ood = None
 
 
 @dataclass
@@ -31,10 +28,7 @@ class Configuration:
 
     # in and out of distribution datasets
     in_distribution_data: Dataset = in_dist
-    out_of_distribution_data: Dataset = ood
-
-    # adversarial attack
-    # attack: fb.Attack = fb.attacks.LinfPGD()
+    out_of_distribution_data: Dataset = ood if strategy != normal else None
 
     # training details
     EPOCHS: int = 20
@@ -50,7 +44,7 @@ class Configuration:
 
         self.checkpoint_filepath = f'./trained_models/checkpoint/{self.strategy}/{self.in_distribution_data.name}/'
 
-    def _make_validation_set(self):
+    def _make_validation_set(self) -> tf.data.Dataset:
 
         if (self.out_of_distribution_data is not None) \
                 and (self.strategy == outlier_exposure):
@@ -62,7 +56,7 @@ class Configuration:
             self.in_dist_val, self.ood_val = in_dist_val, ood_val
         else:
             # normal validation set
-            ds = replace(self.in_distribution_data, split=val_split)
+            ds = replace(self.in_distribution_data, split=val_split).load()
         return ds
 
     def make_model(self) -> tf.keras.Model:
