@@ -4,7 +4,7 @@ from typing import NewType
 
 from util import save_import_tensorflow
 
-tf = save_import_tensorflow(gpu='1')
+tf = save_import_tensorflow(gpu='0')
 
 from make_datasets import Dataset, Cifar10, Cifar100, Food101, Cars196, Cassava, CatsVsDogs, train_split, val_split
 from label_transformations import UniformLabelTransformer, OneHotLabelTransformer

@@ -45,6 +45,25 @@ def outlier_exposure_results(ds: Dataset, ood: Dataset) -> dict:
     result_collection['OOD AUC'] = ood_auc
     print('OOD Area under Curve:', ood_auc)
 
+    # comparison of anomaly score and misclassification
+    erroneous_prediction = y_true != pred_ds.argmax(1)
+    ood_labels = np.array(ood_labels)
+    anomaly_score = pred_ds.max(1)
+    auc = 1. - metrics.roc_auc_score(erroneous_prediction, anomaly_score)
+    result_collection['AUC anomaly score and misclassification'] = auc
+
+    clf_error = 1. - metrics.accuracy_score(erroneous_prediction, anomaly_score < 0.5)
+    result_collection['Classification error anomaly prediction and misclassification'] = clf_error
+
+    recall_error = 1. - metrics.recall_score(erroneous_prediction, anomaly_score < 0.5)
+    result_collection['Recall anomaly prediction and misclassification'] = recall_error
+
+    precision_error = 1. - metrics.precision_score(erroneous_prediction, anomaly_score < 0.5)
+    result_collection['Precision anomaly prediction and misclassification'] = precision_error
+
+    f1_error = 1. - metrics.f1_score(erroneous_prediction, anomaly_score < 0.5)
+    result_collection['F1 Score anomaly prediction and misclassification'] = f1_error
+
     def fpr95(y_true, y_pred):
         fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred)
         ix = np.argwhere(tpr >= 0.95).ravel()[0]

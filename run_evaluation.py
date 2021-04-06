@@ -24,8 +24,8 @@ for ds in datasets:
         if ds_name == ood_name:
             continue
 
-        results[(ood_name, 'outlier exposure')] = outlier_exposure_results(ds, ood)
         results[(ood_name, 'ODIN')] = odin_results(ds, ood)
+        results[(ood_name, 'outlier exposure')] = outlier_exposure_results(ds, ood)
         results[(ood_name, 'single isolation forest')] = isolation_forest_results(ds, ood, iforest_per_class=False)
         results[(ood_name, 'multiple isolation forests')] = isolation_forest_results(ds, ood, iforest_per_class=True)
 
@@ -36,7 +36,6 @@ for ds in datasets:
 
     df.to_excel(p / f'{ds_name}.xlsx')
     df.to_latex(p / f'{ds_name}.tex')
-
 
 
 from pathlib import Path
@@ -58,8 +57,23 @@ for d in fs:
     r.append(df)
 
 r = pd.concat(r)
-cols = [(f'mean over {len(r)} datasets', c) for c in r.columns]
+cols = [('average over 6 datasets', c) for c in r.columns]
 r.columns = pd.MultiIndex.from_tuples(cols)
+
+clf_error = r.pop(('mean over 6 datasets', 'classification error')).to_frame()
+clf_error.index.names = ['dataset', 'method']
+clf_error.columns = ['classification error']
+caption = 'Classification error on datasets for various methods.'
+clf_error.to_latex('./results/grouped_results/clfResult.tex', label='aggCLFResult', caption=caption,
+                   float_format='%.2f')
+
+
 r.to_excel('./results/grouped_results/grouped_results.xlsx')
+
+caption = 'Results for out of distribution detection based on 6 different datasets. Values represent averages. ' \
+          'While ODIN and Outlier Exposure require explicit optimization for out of distribution detection, our ' \
+          'approach only requires a validation set to learn the outlier distribution. It works with any existing ' \
+          'classifier without modification.'
+r.to_latex('./results/grouped_results/aggOODResult.tex', label='aggOODResult', caption=caption, float_format='%.2f')
 
 
