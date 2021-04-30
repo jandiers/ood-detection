@@ -1,8 +1,9 @@
 from dataclasses import replace
-from make_datasets import Dataset
 
-from sklearn import metrics
 import numpy as np
+from sklearn import metrics
+
+from make_datasets import Dataset
 
 
 def outlier_exposure_results(ds: Dataset, ood: Dataset) -> dict:
@@ -26,8 +27,10 @@ def outlier_exposure_results(ds: Dataset, ood: Dataset) -> dict:
     print('Classification Error on dataset:', class_error)
 
     # OOD accuracies
-    ood_detected = (pred_ood > 0.5).any(1).astype(int)   # 1 if classified as in distribution
-    in_dist_detected = (pred_ds > 0.5).any(1).astype(int)
+    threshold = np.percentile(pred_ds.max(1), 5)  # percentile as threshold for ood-classfication
+    result_collection['threshold_ood'] = threshold
+    ood_detected = (pred_ood > threshold).any(1).astype(int)   # 1 if classified as in distribution
+    in_dist_detected = (pred_ds > threshold).any(1).astype(int)
 
     # concat pred for in-dist and out-of-dist
     all_pred = np.hstack((ood_detected, in_dist_detected))
@@ -49,20 +52,11 @@ def outlier_exposure_results(ds: Dataset, ood: Dataset) -> dict:
     erroneous_prediction = y_true != pred_ds.argmax(1)
     ood_labels = np.array(ood_labels)
     anomaly_score = pred_ds.max(1)
-    auc = 1. - metrics.roc_auc_score(erroneous_prediction, anomaly_score)
+    try:
+        auc = metrics.roc_auc_score(erroneous_prediction, anomaly_score)
+    except ValueError:
+        auc = -123456789
     result_collection['AUC anomaly score and misclassification'] = auc
-
-    clf_error = 1. - metrics.accuracy_score(erroneous_prediction, anomaly_score < 0.5)
-    result_collection['Classification error anomaly prediction and misclassification'] = clf_error
-
-    recall_error = 1. - metrics.recall_score(erroneous_prediction, anomaly_score < 0.5)
-    result_collection['Recall anomaly prediction and misclassification'] = recall_error
-
-    precision_error = 1. - metrics.precision_score(erroneous_prediction, anomaly_score < 0.5)
-    result_collection['Precision anomaly prediction and misclassification'] = precision_error
-
-    f1_error = 1. - metrics.f1_score(erroneous_prediction, anomaly_score < 0.5)
-    result_collection['F1 Score anomaly prediction and misclassification'] = f1_error
 
     def fpr95(y_true, y_pred):
         fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred)

@@ -2,12 +2,9 @@ from dataclasses import replace
 
 from util import save_import_tensorflow
 tf = save_import_tensorflow('1')
-
-from make_datasets import Dataset, val_split, test_split, Cifar10, SVHNCropped, Food101
-from label_transformations import OneHotLabelTransformer
-from sklearn import metrics, ensemble
+from make_datasets import Dataset
+from sklearn import metrics
 import numpy as np
-import pandas as pd
 import tqdm
 
 
@@ -84,8 +81,9 @@ def odin_results(ds: Dataset, ood: Dataset):
     ood_labels = [0] * len(pred_ood) + [1] * len(pred_ds)
 
     # OOD accuracies
-    delta = 0.5
-    all_pred = (pred > delta).any(1).astype(int)   # 1 if classified as in distribution
+    threshold = np.percentile(pred_ds.max(1), 5)  # percentile as threshold for ood-classfication
+    result_collection['threshold_ood'] = threshold
+    all_pred = (pred > threshold).any(1).astype(int)   # 1 if classified as in distribution
 
     ood_error = 1. - metrics.accuracy_score(ood_labels, all_pred)
     print('OOD Error:', ood_error)
@@ -100,23 +98,15 @@ def odin_results(ds: Dataset, ood: Dataset):
     erroneous_prediction = y_true != pred_ds.argmax(1)
     ood_labels = np.array(ood_labels)
     anomaly_score = pred_ds.max(1)
-    auc = 1. - metrics.roc_auc_score(erroneous_prediction, anomaly_score)
+    try:
+        auc = metrics.roc_auc_score(erroneous_prediction, anomaly_score)
+    except ValueError:
+        auc = -123456789
     result_collection['AUC anomaly score and misclassification'] = auc
-
-    clf_error = 1. - metrics.accuracy_score(erroneous_prediction, anomaly_score < 0.5)
-    result_collection['Classification error anomaly prediction and misclassification'] = clf_error
-
-    recall_error = 1. - metrics.recall_score(erroneous_prediction, anomaly_score < 0.5)
-    result_collection['Recall anomaly prediction and misclassification'] = recall_error
-
-    precision_error = 1. - metrics.precision_score(erroneous_prediction, anomaly_score < 0.5)
-    result_collection['Precision anomaly prediction and misclassification'] = precision_error
-
-    f1_error = 1. - metrics.f1_score(erroneous_prediction, anomaly_score < 0.5)
-    result_collection['F1 Score anomaly prediction and misclassification'] = f1_error
 
     fpr = fpr95(ood_labels, p)
     result_collection['FPR at 95% TPR'] = fpr
     print('FPR at 95% TPR:', fpr)
 
     return result_collection
+
