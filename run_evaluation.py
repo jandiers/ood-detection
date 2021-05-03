@@ -31,8 +31,8 @@ for ds in datasets:
             continue
 
         results[(ood_name, 'ODIN')] = odin_results(ds, ood)
-        results[(ood_name, 'outlier exposure')] = outlier_exposure_results(ds, ood)
-        results[(ood_name, 'single isolation forest')] = isolation_forest_results(ds, ood, iforest_per_class=False)
+        results[(ood_name, 'Outlier Exposure')] = outlier_exposure_results(ds, ood)
+        results[(ood_name, 'Isolation Forest')] = isolation_forest_results(ds, ood, iforest_per_class=False)
         results[(ood_name, 'Gradient Boosting Classifier')] = gradient_boosting_results(ds, ood)
 
     df = pd.DataFrame(results).round(4)
@@ -62,6 +62,7 @@ for d in fs:
 r = pd.concat(r)
 cols = [('average over 6 OOD datasets', c) for c in r.columns]
 r.columns = pd.MultiIndex.from_tuples(cols)
+r = r.drop('threshold_ood', axis=1, level=1)
 
 clf_error = r.pop(('average over 6 OOD datasets', 'classification error')).to_frame()
 clf_error.index.names = ['dataset', 'method']
