@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 
-def isolation_forest_results(ds: Dataset, ood: Dataset, iforest_per_class: bool) -> bool:
+def isolation_forest_results(ds: Dataset, ood: Dataset, iforest_per_class: bool) -> dict:
     from conf import conf, normal
     result_collection = dict()
 
@@ -70,9 +70,24 @@ def isolation_forest_results(ds: Dataset, ood: Dataset, iforest_per_class: bool)
     result_collection['OOD error'] = ood_error
 
     scores = r.scores
-    ood_auc = metrics.roc_auc_score(ood_labels, scores)
+    try:
+        ood_auc = metrics.roc_auc_score(ood_labels, scores)
+    except ValueError:
+        ood_auc = -123456789
     result_collection['OOD AUC'] = ood_auc
     print('OOD Area under Curve:', ood_auc)
+
+    # comparison of anomaly score and misclassification
+    erroneous_prediction = y_true != pred_ds.argmax(1)
+    ood_labels = np.array(ood_labels)
+    iforest_score = r[ood_labels == 1]
+
+    try:
+        auc = 1. - metrics.roc_auc_score(erroneous_prediction, iforest_score['scores'].values)
+    except ValueError:
+        auc = -123456789
+
+    result_collection['AUC anomaly score and misclassification'] = auc
 
     def fpr95(y_true, y_pred):
         fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred)
@@ -82,4 +97,5 @@ def isolation_forest_results(ds: Dataset, ood: Dataset, iforest_per_class: bool)
     fpr = fpr95(ood_labels, scores)
     result_collection['FPR at 95% TPR'] = fpr
     print('FPR at 95% TPR:', fpr)
+
     return result_collection

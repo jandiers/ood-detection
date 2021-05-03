@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field, make_dataclass, replace
-from typing import NewType, Union
+from typing import NewType
 import re
 
 from label_transformations import LabelTransformer
@@ -24,8 +24,8 @@ class Dataset:
     split: Split
 
     IMG_SIZE: int = 224
-    BATCH_SIZE: int = 128
-    NUM_WORKER: int = 4  # tf.data.experimental.AUTOTUNE
+    BATCH_SIZE: int = 32
+    NUM_WORKER: int = tf.data.experimental.AUTOTUNE
     CACHE: bool = False
 
     num_samples: int = field(default=None)
