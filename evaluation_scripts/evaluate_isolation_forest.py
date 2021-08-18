@@ -1,11 +1,11 @@
 from dataclasses import replace
 
-from sklearn.exceptions import NotFittedError
-
-from make_datasets import Dataset, val_split
-from sklearn import metrics, ensemble
 import numpy as np
 import pandas as pd
+from sklearn import metrics, ensemble
+from sklearn.exceptions import NotFittedError
+
+from datasets.make_datasets import Dataset, val_split
 
 
 def isolation_forest_results(ds: Dataset, ood: Dataset, iforest_per_class: bool) -> dict:

@@ -1,11 +1,11 @@
 from dataclasses import replace
 
-from util import save_import_tensorflow
-tf = save_import_tensorflow('1')
-from make_datasets import Dataset
-from sklearn import metrics
 import numpy as np
+import tensorflow as tf
 import tqdm
+from sklearn import metrics
+
+from datasets.make_datasets import Dataset
 
 
 def fpr95(y_true, y_pred):
@@ -15,7 +15,6 @@ def fpr95(y_true, y_pred):
 
 
 def ODIN(ds, model, temperature, epsilon):
-
     # code ported from pytorch to tensorflow based on the implementations by Liang et al. (ODIN)
     # and Chen et al (robust out of distribution detection)
 
@@ -83,7 +82,7 @@ def odin_results(ds: Dataset, ood: Dataset):
     # OOD accuracies
     threshold = np.percentile(pred_ds.max(1), 5)  # percentile as threshold for ood-classfication
     result_collection['threshold_ood'] = threshold
-    all_pred = (pred > threshold).any(1).astype(int)   # 1 if classified as in distribution
+    all_pred = (pred > threshold).any(1).astype(int)  # 1 if classified as in distribution
 
     ood_error = 1. - metrics.accuracy_score(ood_labels, all_pred)
     print('OOD Error:', ood_error)
@@ -109,4 +108,3 @@ def odin_results(ds: Dataset, ood: Dataset):
     print('FPR at 95% TPR:', fpr)
 
     return result_collection
-

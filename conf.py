@@ -1,13 +1,11 @@
-from dataclasses import dataclass, asdict, field, replace
 import json
+from dataclasses import dataclass, asdict, field, replace
 from typing import NewType
 
-from util import save_import_tensorflow
+import tensorflow as tf
 
-tf = save_import_tensorflow(gpu='1')
-
-from make_datasets import Dataset, Cifar10, Cifar100, Food101, Cars196, Cassava, CatsVsDogs, train_split, val_split
-from label_transformations import UniformLabelTransformer, OneHotLabelTransformer
+from datasets.label_transformations import UniformLabelTransformer, OneHotLabelTransformer
+from datasets.make_datasets import Dataset, Cifar10, Food101, train_split, val_split
 
 TrainingStrategy = NewType('TrainingStrategy', str)
 normal = TrainingStrategy('normal')

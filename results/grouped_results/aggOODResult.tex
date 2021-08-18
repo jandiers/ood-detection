@@ -1,0 +1,38 @@
+\begin{table}
+\centering
+\caption{Results for out of distribution detection based on 6 different datasets. Values represent averages. While ODIN and Outlier Exposure require explicit optimization for out of distribution detection, our approach only requires a validation set to learn the outlier distribution. It works with any existing classifier without modification.}
+\label{aggOODResult}
+\begin{tabular}{llrrr}
+\toprule
+        &                              & \multicolumn{3}{l}{average over 6 OOD datasets} \\
+        &                              &                   OOD error & OOD AUC & FPR at 95\% TPR \\
+dataset & method &                             &         &                \\
+\midrule
+CatsVsDogs & Baseline &                        0.04 &    0.98 &           0.02 \\
+        & ODIN &                        0.05 &    0.98 &           0.04 \\
+        & Outlier Exposure &                        0.03 &    0.99 &           0.02 \\
+        & Isolation Forest &                        0.09 &    0.98 &           0.03 \\
+        & Gradient Boosting Classifier &                        0.04 &    0.98 &           0.07 \\
+Cifar10 & Baseline &                        0.18 &    0.89 &           0.37 \\
+        & ODIN &                        0.21 &    0.81 &           0.42 \\
+        & Outlier Exposure &                        0.15 &    0.93 &           0.29 \\
+        & Isolation Forest &                        0.18 &    0.92 &           0.30 \\
+        & Gradient Boosting Classifier &                        0.20 &    0.91 &           0.29 \\
+Cifar100 & Baseline &                        0.25 &    0.86 &           0.50 \\
+        & ODIN &                        0.21 &    0.86 &           0.40 \\
+        & Outlier Exposure &                        0.23 &    0.88 &           0.47 \\
+        & Isolation Forest &                        0.38 &    0.71 &           0.94 \\
+        & Gradient Boosting Classifier &                        0.27 &    0.87 &           0.43 \\
+Cars196 & Baseline &                        0.45 &    0.66 &           0.96 \\
+        & ODIN &                        0.43 &    0.61 &           0.93 \\
+        & Outlier Exposure &                        0.45 &    0.68 &           0.95 \\
+        & Isolation Forest &                        0.44 &    0.78 &           0.75 \\
+        & Gradient Boosting Classifier &                        0.05 &    0.99 &           0.04 \\
+Cassava & Baseline &                        0.57 &    0.85 &           0.69 \\
+        & ODIN &                        0.35 &    0.86 &           0.43 \\
+        & Outlier Exposure &                        0.62 &    0.80 &           0.76 \\
+        & Isolation Forest &                        0.22 &    0.86 &           0.77 \\
+        & Gradient Boosting Classifier &                        0.12 &    0.88 &           0.40 \\
+\bottomrule
+\end{tabular}
+\end{table}
