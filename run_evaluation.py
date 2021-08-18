@@ -2,11 +2,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from evaluate_isolation_forest import isolation_forest_results
-from evaluate_odin import odin_results
-from evaluate_outlier_exposure import outlier_exposure_results
-from evaluate_supervised import gradient_boosting_results
-from make_datasets import Cifar10, Cifar100, Textures, SVHNCropped, CatsVsDogs, Cassava, Cars196, test_split
+from evaluation_scripts.evaluate_baseline import baseline_results
+from evaluation_scripts.evaluate_isolation_forest import isolation_forest_results
+from evaluation_scripts.evaluate_odin import odin_results
+from evaluation_scripts.evaluate_outlier_exposure import outlier_exposure_results
+from evaluation_scripts.evaluate_supervised import gradient_boosting_results
+from datasets.make_datasets import Cifar10, Cifar100, Textures, SVHNCropped, CatsVsDogs, Cassava, Cars196, test_split
 
 # in and out of distribution data
 datasets = [
@@ -16,10 +17,6 @@ datasets = [
     Cars196(test_split),
     Cassava(test_split),
 ]
-"""
-ds = datasets[-2]
-ood = datasets[1]
-"""
 
 for ds in datasets:
     ds_name = ds.__class__.__name__
@@ -30,6 +27,7 @@ for ds in datasets:
         if ds_name == ood_name:
             continue
 
+        results[(ood_name, 'Baseline')] = baseline_results(ds, ood)
         results[(ood_name, 'ODIN')] = odin_results(ds, ood)
         results[(ood_name, 'Outlier Exposure')] = outlier_exposure_results(ds, ood)
         results[(ood_name, 'Isolation Forest')] = isolation_forest_results(ds, ood, iforest_per_class=False)
@@ -40,8 +38,9 @@ for ds in datasets:
     p = (Path.cwd() / 'results')
     p.mkdir(exist_ok=True)
 
-    df.to_excel(p / f'{ds_name}.xlsx')
-    df.to_latex(p / f'{ds_name}.tex')
+    df = df.drop('AUC anomaly score and misclassification', axis=0)
+    df.fillna('-').T.to_excel(p / f'{ds_name}.xlsx')
+    df.fillna('-').T.to_latex(p / f'{ds_name}.tex')
 
 from pathlib import Path
 import pandas as pd

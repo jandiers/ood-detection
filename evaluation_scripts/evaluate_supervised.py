@@ -1,9 +1,10 @@
 from dataclasses import replace
 
-from make_datasets import Dataset, val_split, Food101
-from sklearn import metrics, ensemble
 import numpy as np
 import pandas as pd
+from sklearn import metrics, ensemble
+
+from datasets.make_datasets import Dataset, val_split, Food101
 
 
 def gradient_boosting_results(ds: Dataset, ood: Dataset) -> dict:

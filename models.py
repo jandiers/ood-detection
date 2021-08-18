@@ -1,6 +1,5 @@
-from util import save_import_tensorflow
+import tensorflow as tf
 
-tf = save_import_tensorflow(gpu='1')
 layers = tf.keras.layers
 
 

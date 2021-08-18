@@ -1,13 +1,12 @@
+import re
 from dataclasses import dataclass, field, make_dataclass, replace
 from typing import NewType
-import re
 
-from label_transformations import LabelTransformer
-from models import augment_image
-from util import save_import_tensorflow
-
-tf = save_import_tensorflow(gpu='1')
+import tensorflow as tf
 import tensorflow_datasets as tfds
+
+from datasets.label_transformations import LabelTransformer
+from models import augment_image
 
 Split = NewType('Split', str)
 train_split: Split = Split('train')
@@ -105,7 +104,6 @@ Cifar10 = make_dataclass('Cifar10', [
     ('num_samples', int, None),
     ('name', str, 'cifar10')], bases=(_Cifar,))
 
-
 Cifar100 = make_dataclass('Cifar100', [
     ('split', Split),
     ('num_samples', int, None),
@@ -114,7 +112,6 @@ Cifar100 = make_dataclass('Cifar100', [
 
 @dataclass
 class Cassava(Dataset):
-
     split: Split = train_split
     BATCH_SIZE = int = 32
     name: str = 'cassava'
@@ -223,4 +220,3 @@ class Cars196(_LoadFromDictDataset):
             self.split = Split('train[80%:]')
 
         super(Cars196, self).__post_init__()
-

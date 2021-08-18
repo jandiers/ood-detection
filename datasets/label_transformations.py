@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
 from typing import NewType
-from util import save_import_tensorflow
-tf = save_import_tensorflow(gpu='1')
+
+import tensorflow as tf
 
 TransformedLabels = NewType('TransformedLabels', callable)
-
 
 """
 Classes for Label Transformations
@@ -13,7 +12,6 @@ Classes for Label Transformations
 
 @dataclass
 class LabelTransformer:
-
     num_classes: int = field(default=None)
 
     def __call__(self, x, y) -> TransformedLabels:

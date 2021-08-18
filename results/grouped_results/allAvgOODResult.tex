@@ -1,0 +1,18 @@
+\begin{table}
+\centering
+\caption{Results averaged over all out-of-distribution datasets and all in-distribution datasets. The supervised OOD-method based on Gradient Boosting classification outperforms all other methods in all metrics. Especially in terms of OOD-error, which is the most important metric when OOD is applied in practice, the supervised methods is clearly the best. Also the OOD detection based on Isolation Forests works well. Note that Isolation Forests work completely unsupervised and therefore solve a much more difficult task to detect OOD-Input.}
+\label{allAvgOODResult}
+\begin{tabular}{lrrr}
+\toprule
+{} & \multicolumn{3}{l}{average over 6 OOD datasets} \\
+{} &                   OOD error & OOD AUC & FPR at 95\% TPR \\
+Average over 5 in-distribution datasets &                             &         &                \\
+\midrule
+Baseline                                &                        0.30 &    0.85 &           0.51 \\
+ODIN                                    &                        0.25 &    0.82 &           0.44 \\
+Outlier Exposure                        &                        0.30 &    0.86 &           0.50 \\
+Isolation Forest                        &                        0.26 &    0.85 &           0.56 \\
+Gradient Boosting Classifier            &                        0.14 &    0.92 &           0.25 \\
+\bottomrule
+\end{tabular}
+\end{table}

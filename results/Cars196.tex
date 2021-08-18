@@ -1,0 +1,36 @@
+\begin{tabular}{lllllll}
+\toprule
+            &                              & threshold\_ood & classification error & OOD error & OOD AUC & FPR at 95\% TPR \\
+\midrule
+CatsVsDogs & Baseline &        0.0766 &               0.3393 &    0.3611 &  0.6999 &         0.8988 \\
+            & ODIN &        0.0593 &               0.3393 &    0.3651 &  0.5945 &         0.9095 \\
+            & Outlier Exposure &        0.0683 &               0.3307 &    0.3409 &  0.7895 &         0.8435 \\
+            & Isolation Forest &             - &               0.3393 &    0.3665 &  0.7427 &         0.8738 \\
+            & Gradient Boosting Classifier &             - &               0.3393 &    0.0295 &  0.9968 &         0.0132 \\
+Cifar10 & Baseline &        0.0766 &               0.3393 &    0.5657 &  0.6439 &         0.9802 \\
+            & ODIN &        0.0593 &               0.3393 &     0.566 &  0.5558 &         0.9808 \\
+            & Outlier Exposure &        0.0683 &               0.3307 &    0.5668 &  0.6551 &         0.9822 \\
+            & Isolation Forest &             - &               0.3393 &    0.5543 &  0.7833 &         0.7742 \\
+            & Gradient Boosting Classifier &             - &               0.3393 &    0.0851 &  0.9819 &         0.0751 \\
+Cifar100 & Baseline &        0.0766 &               0.3393 &    0.5624 &  0.6514 &         0.9743 \\
+            & ODIN &        0.0593 &               0.3393 &    0.5581 &  0.5935 &         0.9665 \\
+            & Outlier Exposure &        0.0683 &               0.3307 &     0.568 &  0.6579 &         0.9845 \\
+            & Isolation Forest &             - &               0.3393 &    0.5543 &  0.8006 &         0.7523 \\
+            & Gradient Boosting Classifier &             - &               0.3393 &    0.0423 &  0.9923 &         0.0358 \\
+Cassava & Baseline &        0.0766 &               0.3393 &    0.2287 &  0.6356 &         0.9905 \\
+            & ODIN &        0.0593 &               0.3393 &    0.2293 &  0.5585 &         0.9936 \\
+            & Outlier Exposure &        0.0683 &               0.3307 &    0.2173 &  0.7248 &         0.9305 \\
+            & Isolation Forest &             - &               0.3393 &    0.1899 &  0.7277 &         0.8631 \\
+            & Gradient Boosting Classifier &             - &               0.3393 &    0.0339 &  0.9949 &          0.023 \\
+Textures & Baseline &        0.0766 &               0.3393 &    0.4324 &  0.6134 &         0.9773 \\
+            & ODIN &        0.0593 &               0.3393 &    0.4082 &  0.5752 &         0.9188 \\
+            & Outlier Exposure &        0.0683 &               0.3307 &    0.4294 &  0.6213 &         0.9702 \\
+            & Isolation Forest &             - &               0.3393 &    0.4123 &  0.6915 &         0.8674 \\
+            & Gradient Boosting Classifier &             - &               0.3393 &    0.1022 &  0.9728 &         0.1024 \\
+SVHNCropped & Baseline &        0.0766 &               0.3393 &    0.5551 &  0.7013 &         0.9612 \\
+            & ODIN &        0.0593 &               0.3393 &    0.4625 &  0.7632 &         0.7941 \\
+            & Outlier Exposure &        0.0683 &               0.3307 &    0.5732 &  0.6336 &         0.9938 \\
+            & Isolation Forest &             - &               0.3393 &    0.5543 &  0.9219 &         0.3882 \\
+            & Gradient Boosting Classifier &             - &               0.3393 &    0.0235 &  0.9968 &         0.0153 \\
+\bottomrule
+\end{tabular}

@@ -1,8 +1,8 @@
+import tensorflow as tf
+
 from conf import conf, outlier_exposure
 from models import ood_accuracy
 
-from util import save_import_tensorflow
-tf = save_import_tensorflow('1')
 layers = tf.keras.layers
 ReduceLROnPlateau = tf.python.keras.callbacks.ReduceLROnPlateau
 EarlyStopping = tf.python.keras.callbacks.EarlyStopping
@@ -13,7 +13,6 @@ ds_val = conf.val_ds
 if conf.strategy == outlier_exposure:
     ds_out = conf.out_of_distribution_data.load()
     ds = tf.data.experimental.sample_from_datasets([ds, ds_out], [0.5, 0.5], seed=29)
-
 
 model = conf.make_model()
 
@@ -65,4 +64,3 @@ hist = model.fit(ds, epochs=conf.EPOCHS, initial_epoch=3, validation_data=ds_val
                             model_checkpoint_callback])
 
 model.evaluate(ds, verbose=1)
-
