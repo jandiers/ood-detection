@@ -46,7 +46,7 @@ to cite our work. Also, please consider to cite the repositories from
 ````
 Diers, Jan and Christian Pigorsch. “Out-of-Distribution Detection using Outlier Detection Methods.” (2021).
 ````
-
+BibTeX:
 
 ````
 @inproceedings{Diers2021OutofDistributionDU,
