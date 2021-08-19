@@ -44,10 +44,14 @@ to cite our work. Also, please consider to cite the repositories from
 [Liang et al.](https://github.com/facebookresearch/odin) that our code relies on. 
 
 ````
-The citation will appear here soon.
+Diers, Jan and Christian Pigorsch. “Out-of-Distribution Detection using Outlier Detection Methods.” (2021).
 ````
 
 
 ````
-BibTeX yet to come.
+@inproceedings{Diers2021OutofDistributionDU,
+  title={Out-of-Distribution Detection using Outlier Detection Methods},
+  author={Jan Diers and Christian Pigorsch},
+  year={2021}
+}
 ````
