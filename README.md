@@ -1,10 +1,6 @@
 # Out-of-Distribution Detection using Outlier Detection Methods
 
-Out-of-distribution detection (OOD) deals with anomalous input to neural networks. In the past, specialized methods have 
-been proposed to reject predictions on anomalous input. We use outlier detection algorithms to detect anomalous input 
-as reliable as specialized methods from the field of OOD. No neural network adaptation is required; detection is based 
-on the model's softmax score. Our approach works unsupervised with an Isolation Forest or with supervised classifiers 
-such as a Gradient Boosting machine.
+Out-of-distribution detection (OOD) deals with anomalous input to neural networks. In the past, specialized methods have been proposed to identify anomalous input. Similarly, it was shown that feature extraction models in combination with outlier detection algorithms are well suited to detect anomalous input.  We use outlier detection algorithms to detect anomalous input as reliable as specialized methods from the field of OOD. No neural network adaptation is required; detection is based on the model's softmax score. Our approach works unsupervised using an Isolation Forest and can be further improved by using a supervised learning method such as Gradient Boosting.
 
 This repository contains the code used for the experiments, as well as instructions to reproduce our results. 
 
