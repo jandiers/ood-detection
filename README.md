@@ -40,14 +40,27 @@ to cite our work. Also, please consider to cite the repositories from
 [Liang et al.](https://github.com/facebookresearch/odin) that our code relies on. 
 
 ````
-Diers, Jan and Christian Pigorsch. “Out-of-Distribution Detection using Outlier Detection Methods.” (2021).
+Diers, J., Pigorsch, C. (2022). Out-of-Distribution Detection Using Outlier Detection Methods. In: Sclaroff, S., Distante, C., Leo, M., Farinella, G.M., Tombari, F. (eds) Image Analysis and Processing – ICIAP 2022. ICIAP 2022. Lecture Notes in Computer Science, vol 13233. Springer, Cham. https://doi.org/10.1007/978-3-031-06433-3_2
 ````
 BibTeX:
 
 ````
-@inproceedings{Diers2021OutofDistributionDU,
-  title={Out-of-Distribution Detection using Outlier Detection Methods},
-  author={Jan Diers and Christian Pigorsch},
-  year={2021}
+@InProceedings{10.1007/978-3-031-06433-3_2,
+author="Diers, Jan
+and Pigorsch, Christian",
+editor="Sclaroff, Stan
+and Distante, Cosimo
+and Leo, Marco
+and Farinella, Giovanni M.
+and Tombari, Federico",
+title="Out-of-Distribution Detection Using Outlier Detection Methods",
+booktitle="Image Analysis and Processing -- ICIAP 2022",
+year="2022",
+publisher="Springer International Publishing",
+address="Cham",
+pages="15--26",
+isbn="978-3-031-06433-3"
 }
+
+
 ````
